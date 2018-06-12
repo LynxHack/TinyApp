@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>TinyApp</title>
+        
+        <style>
+            .links{
+                display:inline-block;
+            }
+            .button{
+                padding: 14px 32px;
+                background-color: white;
+                background-repeat: no-repeat;
+                background-image:  url(trashcan.png);
+                background-size: 30px auto;
+                background-position: right;
+                text-align: left;
+                border-radius: 5px;
+            }
+            
+            p{
+                font-family: sans-serif;
+            }
+        </style> 
+    
+    </head>
+    
+    <body>
+            <% for(i = 0; i<<%=urllength%>; i++){%>
+            
+            <p><%=shorturl%> &rarr; 
+                <a href= "<%=longurl%>"> <%=longurl%></a> 
+                <a href="javascript: void(0)" id="edit">Edit</a>
+                <span><form method="POST" action="/urls/<%-shorturl%>/delete">
+                    <input class="button" type="button" value="Delete">
+                    </form></span> 
+            </p>
+        
+            <%}%>
+            
+            <script>
+                document.getElementById("edit").onclick = function(){ /*TO DO: run ejs render of the */};
+            </script>
+        
+        <!-- Add your EJS code here -->
+    </body>
+</html>                                             
+
