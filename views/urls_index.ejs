@@ -17,7 +17,9 @@
                 text-align: left;
                 border-radius: 5px;
             }
-            
+            a{
+                font-family: sans-serif;
+            }
             p{
                 font-family: sans-serif;
             }
@@ -26,14 +28,25 @@
     </head>
     
     <body>
-            <% for(i = 0; i<<%=urllength%>; i++){%>
-            
-            <p><%=shorturl%> &rarr; 
-                <a href= "<%=longurl%>"> <%=longurl%></a> 
-                <a href="javascript: void(0)" id="edit">Edit</a>
-                <span><form method="POST" action="/urls/<%-shorturl%>/delete">
-                    <input class="button" type="button" value="Delete">
-                    </form></span> 
+            <% for (var url in urlDatabase) { %>
+            <!- create form submission via inline javascript ->
+            <p><%=url%> &rarr; 
+                <a href= "<%=urlDatabase[url]%>"> <%=urlDatabase[url]%></a> 
+                <!--
+                <form id="edit<%=url%>" method="POST" action="/urls/<%= url %>">
+                        <a href="javascript:{}" 
+                        onclick="
+                        document.getElementById('edit<%=url%>').submit(); 
+                        return false;">
+                        edit
+                        </a>
+                </form>
+                --> 
+                <a href="/urls/<%= url %>">Edit</a>   
+                <!- send POST request upon delete submit ->
+                <form method="POST" action="/urls/<%= url %>/delete">
+                    <input class="button" type="submit" value="Delete">
+                </form> 
             </p>
         
             <%}%>

@@ -2,20 +2,22 @@
 <html>
         <head>
                 <title>shortURL</title>
+                <style>
+                        p{
+                                font-family: sans-serif;
+                        }
+                        #titlename{
+                                font-size: 30px;
+                        }
+                </style>
         </head>
 
         <body>
-            <p><b>shortURL:</b> <%= shortURL %></p>
-                <form>
-                        <input type="text" name="URL">
+            <p id = "titlename"><b>shortURL:</b> <%= shortURL %></p>
+                <form method="POST" action="/urls/<%= shortURL %>">
+                        <input type="text" name="URL" value="<%=urlDatabase[shortURL]%>" size ="35">
                         <input type="submit" value="Update">
                 </form>
         </body>
 </html>
-~                                                                                                     
-~                                                                                                     
-~                                                                                                     
-~                                                                                                     
-~                                                                                                     
-~                                        
 
