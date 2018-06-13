@@ -4,6 +4,8 @@ const app = express();
 const PORT = 8080; // default port 8080
 const bodyParser = require("body-parser");
 const cookieParser = require('cookie-parser');
+const bcrypt = require('bcrypt');
+
 
 let urlDatabase = {
   "b2xVn2": {link:"http://www.lighthouselabs.ca",
@@ -12,16 +14,17 @@ let urlDatabase = {
             userid:"user2RandomID"}
 };
 
+//Initialize two entries for test cases
 const users = { 
   "userRandomID": {
     id: "userRandomID", 
     email: "user@example.com", 
-    password: "purple-monkey-dinosaur"
+    password: bcrypt.hashSync("purple-monkey-dinosaur",10)
   },
  "user2RandomID": {
     id: "user2RandomID", 
     email: "user2@example.com", 
-    password: "dishwasher-funk"
+    password: bcrypt.hashSync("dishwasher-funk",10)
   }
 }
 
@@ -66,11 +69,11 @@ function emailcheck(email){
   return matches;
 }
 
-//Check if login is valid
+//Check if login is valid through bcrypt hashing
 function logincheck(email, password){
   let matches = false;
   for(user in users){
-    if(users[user]["email"] === email && users[user]["password"] === password){
+    if(users[user]["email"] === email && bcrypt.compareSync(password, users[user]["password"])){
       matches = true;
       break;
     }
@@ -118,7 +121,7 @@ app.post("/register", (req, res) =>{
     res.status(400).send("Email address already exists!");
   }
   var newid = generateRandomString();
-  users[newid] = {id: newid, email: req.body.email, password: req.body.password};
+  users[newid] = {id: newid, email: req.body.email, password: bcrypt.hashSync(req.body.password, 10)};
   console.log("updated user list: ", users);
   //res.cookie["user_id"] = newid;
   res.redirect("/urls");
