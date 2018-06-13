@@ -1,8 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head></head>
+  <head>
+    <title>New URL Entry</title>
+  </head>
   <body style="font-size:20px; padding:50px;">
-    <form action="/urls" method="POST" style="margin:150px;">
+    <h1 style><b>Enter New URL</b></h1>
+    <form action="/urls/new" method="POST" style="margin:150px;">
       <label for="longURL">Enter a URL:</label>
       <input id="longURL" type="text" name="longURL" placeholder="http://" style="width: 300px">
       <input type="submit" value="Submit">

@@ -4,12 +4,13 @@
             <title>login</title>
         </head>
         <body>
-            <p><b>Login Form:</b></p>
+            <h2><b>Login to view and edit list of shorturls</b></h2>
             <p> 
                 <% if (username != undefined) {%>
                 <form method=POST action="/logout">                 
                     <input type="submit" value="logout">
                 </form>
+                <a href="/urls">Return to home</a>
                 <% } else{ %>
                 <form method=POST action="/login">
                     <!--
@@ -20,6 +21,7 @@
                     <input type="submit" value="login">
                 </form>
                 <a href="/register">Click here to register</a>
+                <a href="/urls">Go back to main page</a>
                 <%}%>
             </p>
         </body>

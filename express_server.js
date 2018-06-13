@@ -5,10 +5,11 @@ const PORT = 8080; // default port 8080
 const bodyParser = require("body-parser");
 const cookieParser = require('cookie-parser');
 
-
 let urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
+  "b2xVn2": {link:"http://www.lighthouselabs.ca",
+            userid:"userRandomID"},
+  "9sm5xK": {link: "http://www.google.com",
+            userid:"user2RandomID"}
 };
 
 const users = { 
@@ -29,6 +30,32 @@ app.use(bodyParser.urlencoded({extended: true}));
 app.use(cookieParser());
 
 //Auxiliary functions
+
+//Parse UrlDataBase to Create User Specific url List
+//return format {id: link, id: link ...}
+function makeuserurls(userid){
+  let urllist = {};
+  console.log("user info", userid);
+  for(url in urlDatabase){
+    console.log(urlDatabase[url]["userid"], userid)
+    if(urlDatabase[url]["userid"] === userid){
+      urllist[url] = urlDatabase[url]["link"];
+    }
+  }
+  console.log(urllist);
+  return urllist;
+}
+
+//Return master url list in format {id: link, id: link}
+function masterurllist(){
+  let urllist = {};
+  console.log("user info", userid);
+  for(url in urlDatabase){
+      urllist[url] = urlDatabase[url]["link"];
+  }
+  console.log(urllist);
+  return urllist;
+}
 
 //Check if email exists in users
 function emailcheck(email){
@@ -98,7 +125,11 @@ app.post("/register", (req, res) =>{
 });
 
 app.post("/urls/new", (req, res) => {
-  urlDatabase[generateRandomString()] = req.body.URL;
+  if(!req.cookies["user_id"]){
+    res.redirect("/login");
+  }
+  console.log("new url entered: " + req.body.longURL);
+  urlDatabase[generateRandomString()] = {link: req.body.longURL, userid: req.cookies["user_id"]};
   console.log(req.body.URL);
   console.log(req.body);
   res.redirect("/urls");
@@ -107,8 +138,9 @@ app.post("/urls/new", (req, res) => {
 app.post("/urls/:id", (req, res) => {
   const id = req.params.id;
 	console.log("Updating long url of short url id: " + id);
-	urlDatabase[id] = req.body.URL;
-	res.redirect("/urls/" + id);
+  urlDatabase[id] = req.body.URL;
+  const templateVars = {username: req.cookies["user_id"], users: users};
+	res.render("/urls/" + id, templateVars);
 });
 
 app.post("/urls/:id/delete", (req, res) => {
@@ -138,26 +170,38 @@ app.get("/urls", (req, res) => {
     res.status(300); //not logged in, redirect to login page
     res.redirect("/login");
   }
-  let templateVars = {username: req.cookies["user_id"], urlDatabase: urlDatabase};
+  let templateVars = {
+     username: req.cookies["user_id"], 
+  urlDatabase: makeuserurls(req.cookies["user_id"])
+  };
+
   res.render("urls_index", templateVars);
 });
 
+app.get("/urls/new" , (req, res) => {
+  if(!req.cookies["user_id"]){
+    res.status(300); //not logged in, redirect to login page
+    res.redirect("/login");
+  }
+  const templateVars = {username: req.cookies["user_id"]}; 
+  res.render("urls_new", templateVars);
+});
+
 app.get("/urls/:id", (req, res) => {
-  let templateVars = {username: req.cookies["user_id"], shortURL: req.params.id, urlDatabase: urlDatabase };
+  if(!(req.cookies["user_id"] === urlDatabase[req.params.id].userid)){
+    res.status(400);
+    res.redirect("/login");
+  }
+  let templateVars = {username: req.cookies["user_id"], shortURL: req.params.id, urlDatabase: makeuserurls(req.cookies["user_id"])};
   res.render("urls_show", templateVars);
 });
 
 app.get("/u/:shortURL", (req, res) => {
   const templateVars = {username: req.cookies["user_id"]};
-  let longURL = urlDatabase[req.params.shortURL];
-  res.redirect(longURL, templateVars);
+  let longURL = urlDatabase[req.params.shortURL].link;
+  console.log("Redirecting to: " + longURL);
+  res.redirect(longURL);
 });
-
-app.get("/urls/new" , (req, res) => {
-  const templateVars = {username: req.cookies["user_id"]}; 
-  res.render("urls_new", templateVars);
-});
-
 
 //Port Listen
 app.listen(PORT, () => {

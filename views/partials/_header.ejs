@@ -7,9 +7,16 @@
 		
 -->
 <div style="display: flex">
+	<% if(!username) {%>
 	<form method=GET action="/login">
 		<input id="login" type="submit" value="login" name="loginbutton">
 	</form>
+	<% } else {%>
+	<form method=POST action="/logout">
+		<input id="logout" type="submit" value="logout" name="logoutbutton">
+	</form>
+	<% } %>
+
 	<form method=GET action="/register">
 		<input id="register" type="submit" value="register" name="registerbutton">
 	</form>
