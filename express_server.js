@@ -108,7 +108,6 @@ app.post("/urls", (req, res) => {
 
 app.post("/login", (req, res) => {
   console.log("Login info incoming...");
-  //check if username is entered or login is correct
   if(!req.body.email || !req.body.password){
     res.status(403).send("Please enter info in all boxes");
   }
@@ -117,8 +116,6 @@ app.post("/login", (req, res) => {
     res.status(403).send("Incorrect login credentials")
   }
   req.session.user_id = loginresult;
-  //res.cookie("user_id", loginresult)
-  //res.cookie("username", req.body.username);
   console.log("Cookie value: " + loginresult);
   res.redirect("/urls")
 });
@@ -126,7 +123,6 @@ app.post("/login", (req, res) => {
 app.post("/logout", (req, res) => {
   req.session.user_id = null;
   res.redirect("/urls");
-  //res.clearCookie("user_id").redirect("/urls");
 });
 
 
@@ -141,7 +137,6 @@ app.post("/register", (req, res) =>{
   var newid = generateRandomString();
   users[newid] = {id: newid, email: req.body.email, password: bcrypt.hashSync(req.body.password, 10)};
   console.log("updated user list: ", users);
-  //res.cookie["user_id"] = newid;
   res.redirect("/urls");
 });
 
