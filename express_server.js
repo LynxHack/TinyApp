@@ -3,9 +3,13 @@ const express = require("express");
 const app = express();
 const PORT = 8080; // default port 8080
 const bodyParser = require("body-parser");
-const cookieParser = require('cookie-parser');
-const bcrypt = require('bcrypt');
 
+//Cookie session is now used instead for security
+const cookieParser = require('cookie-parser');
+var cookieSession = require('cookie-session')
+
+//Bcrypt for password hashing
+const bcrypt = require('bcrypt');
 
 let urlDatabase = {
   "b2xVn2": {link:"http://www.lighthouselabs.ca",
@@ -28,9 +32,20 @@ const users = {
   }
 }
 
+//Express middleware initialization
 app.set('view engine', 'ejs');
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(cookieParser());
+
+
+app.use(cookieSession({
+  name: 'session',
+  keys: ['qyjlsfjlon', 'tqbqaqbiop', 'bcjnhmspaz'],
+
+  // Cookie Options - set expirty
+  maxAge: 24 * 60 * 60 * 1000 // 24 hours
+}))
+
 
 //Auxiliary functions
 
@@ -101,14 +116,17 @@ app.post("/login", (req, res) => {
   if(!loginresult){
     res.status(403).send("Incorrect login credentials")
   }
-  res.cookie("user_id", loginresult)
+  req.session.user_id = loginresult;
+  //res.cookie("user_id", loginresult)
   //res.cookie("username", req.body.username);
   console.log("Cookie value: " + loginresult);
   res.redirect("/urls")
 });
 
 app.post("/logout", (req, res) => {
-  res.clearCookie("user_id").redirect("/urls");
+  req.session.user_id = null;
+  res.redirect("/urls");
+  //res.clearCookie("user_id").redirect("/urls");
 });
 
 
@@ -128,11 +146,11 @@ app.post("/register", (req, res) =>{
 });
 
 app.post("/urls/new", (req, res) => {
-  if(!req.cookies["user_id"]){
+  if(!req.session.user_id){
     res.redirect("/login");
   }
   console.log("new url entered: " + req.body.longURL);
-  urlDatabase[generateRandomString()] = {link: req.body.longURL, userid: req.cookies["user_id"]};
+  urlDatabase[generateRandomString()] = {link: req.body.longURL, userid: req.session.user_id};
   console.log(req.body.URL);
   console.log(req.body);
   res.redirect("/urls");
@@ -141,10 +159,11 @@ app.post("/urls/new", (req, res) => {
 app.post("/urls/:id", (req, res) => {
   const id = req.params.id;
 	console.log("Updating long url of short url id: " + id);
-  urlDatabase[id] = req.body.URL;
-  const templateVars = {username: req.cookies["user_id"], users: users};
-	res.render("/urls/" + id, templateVars);
+  urlDatabase[id].link = req.body.URL;
+  const templateVars = {username: req.session.user_id, users: users};
+	res.redirect("/urls");
 });
+
 
 app.post("/urls/:id/delete", (req, res) => {
 	console.log("running post urls id delete for" + req.params.id);
@@ -163,44 +182,44 @@ app.get("/register", (req, res) =>{
 });
 
 app.get("/login", (req, res) => {
-  const templateVars = {username: req.cookies["user_id"], users: users};
+  const templateVars = {username: req.session.user_id, users: users};
   res.render("login", templateVars);
 });
 
 app.get("/urls", (req, res) => {
-  console.log(!req.cookies["user_id"]);
-  if(!req.cookies["user_id"]){
+  console.log(!req.session.user_id);
+  if(!req.session.user_id){
     res.status(300); //not logged in, redirect to login page
     res.redirect("/login");
   }
   let templateVars = {
-     username: req.cookies["user_id"], 
-  urlDatabase: makeuserurls(req.cookies["user_id"])
+     username: req.session.user_id, 
+  urlDatabase: makeuserurls(req.session.user_id)
   };
 
   res.render("urls_index", templateVars);
 });
 
 app.get("/urls/new" , (req, res) => {
-  if(!req.cookies["user_id"]){
+  if(!req.session.user_id){
     res.status(300); //not logged in, redirect to login page
     res.redirect("/login");
   }
-  const templateVars = {username: req.cookies["user_id"]}; 
+  const templateVars = {username: req.session.user_id}; 
   res.render("urls_new", templateVars);
 });
 
 app.get("/urls/:id", (req, res) => {
-  if(!(req.cookies["user_id"] === urlDatabase[req.params.id].userid)){
+  if(!(req.session.user_id === urlDatabase[req.params.id].userid)){
     res.status(400);
     res.redirect("/login");
   }
-  let templateVars = {username: req.cookies["user_id"], shortURL: req.params.id, urlDatabase: makeuserurls(req.cookies["user_id"])};
+  let templateVars = {username: req.session.user_id, shortURL: req.params.id, urlDatabase: makeuserurls(req.session.user_id)};
   res.render("urls_show", templateVars);
 });
 
 app.get("/u/:shortURL", (req, res) => {
-  const templateVars = {username: req.cookies["user_id"]};
+  const templateVars = {username: req.session.user_id};
   let longURL = urlDatabase[req.params.shortURL].link;
   console.log("Redirecting to: " + longURL);
   res.redirect(longURL);
