@@ -4,9 +4,18 @@
             <title>login</title>
         </head>
         <body>
-            <p>
-                <%- include('partials/_home.ejs') %>
-                
+            <p><b>Login Form:</b></p>
+            <p> 
+                <% if (username != undefined) {%>
+                <form method=POST action="/logout">                 
+                    <input type="submit" value="logout">
+                </form>
+                <% } else{ %>
+                <form method=POST action="/login">
+                    <input type="text" name="username" placeholder="Username">                      
+                    <input type="submit" value="login">
+                </form>
+                <%}%>
             </p>
         </body>
     </html>
