@@ -28,16 +28,28 @@ app.set('view engine', 'ejs');
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(cookieParser());
 
+//Auxiliary functions
+
+//Check if email exists in users
 function emailcheck(email){
-  var matches = false;
+  let matches = false;
   for(user in users){
-    console.log(users[user]["email"], email)
-    if(users[user]["email"] === email){matches = true;}
+    if(users[user]["email"] === email){matches = true; break;}
   }
-  console.log("email matched: " + matches);
   return matches;
 }
 
+//Check if login is valid
+function logincheck(email, password){
+  let matches = false;
+  for(user in users){
+    if(users[user]["email"] === email && users[user]["password"] === password){
+      matches = true;
+      break;
+    }
+  }
+  return matches? user:false;
+}
 
 
 //////////////////////////
@@ -51,16 +63,38 @@ app.post("/urls", (req, res) => {
 
 app.post("/login", (req, res) => {
   console.log("Login info incoming...");
-  //check if username is entered
-  if(req.body.username){
-    res.cookie("username", req.body.username);
+  //check if username is entered or login is correct
+  if(!req.body.email || !req.body.password){
+    res.status(403).send("Please enter info in all boxes");
   }
-  console.log("Cookie value: ");
+  const loginresult = logincheck(req.body.email, req.body.password);
+  if(!loginresult){
+    res.status(403).send("Incorrect login credentials")
+  }
+  res.cookie("username", loginresult)
+  //res.cookie("username", req.body.username);
+  console.log("Cookie value: " + loginresult);
   res.redirect("/login")
 });
 
 app.post("/logout", (req, res) => {
-  res.clearCookie("username").redirect("/urls");
+  res.clearCookie("user_id").redirect("/urls");
+});
+
+
+app.post("/register", (req, res) =>{
+  if(!req.body.password || !req.body.email){
+    console.log("user did not input a field in the registration form");
+    res.status(400).send("Failed to enter a field in registration form");
+  }
+  else if(emailcheck(req.body.email)){
+    res.status(400).send("Email address already exists!");
+  }
+  var newid = generateRandomString();
+  users[newid] = {id: newid, email: req.body.email, password: req.body.password};
+  console.log("updated user list: ", users);
+  res.cookie["user_id"] = newid;
+  res.redirect("/urls");
 });
 
 app.post("/urls/new", (req, res) => {
@@ -83,25 +117,6 @@ app.post("/urls/:id/delete", (req, res) => {
 	res.redirect("/urls");
 });
 
-app.post("/register", (req, res) =>{
-  if(!req.body.password || !req.body.email){
-    console.log("user did not input a field in the registration form");
-    res.status(400).send("Failed to enter a field in registration form");
-  }
-  else if(emailcheck(req.body.email)){
-    console.log(!emailcheck(req.body.email));
-    res.status(400).send("Email addres already exists!");
-  }
-  var newid = generateRandomString();
-  users[newid] = {id: newid, email: req.body.email, password: req.body.password};
-  console.log("updated user list: ", users);
-  res.cookie["user_id"] = newid;
-  res.redirect("/urls");
-});
-
-
-
-
 
 
 /////////////////////////
@@ -113,30 +128,28 @@ app.get("/register", (req, res) =>{
 });
 
 app.get("/login", (req, res) => {
-  const templateVars = {username: req.cookies["username"], users: users};
-  console.log(templateVars["username"]);
+  const templateVars = {username: req.cookies["user_id"], users: users};
   res.render("login", templateVars);
 });
 
 app.get("/urls", (req, res) => {
-  let templateVars = {username: req.cookies["username"], urlDatabase: urlDatabase};
-  console.log(req.cookies['username']);
+  let templateVars = {username: req.cookies["user_id"], urlDatabase: urlDatabase};
   res.render("urls_index", templateVars);
 });
 
 app.get("/urls/:id", (req, res) => {
-  let templateVars = {username: req.cookies["username"], shortURL: req.params.id, urlDatabase: urlDatabase };
+  let templateVars = {username: req.cookies["user_id"], shortURL: req.params.id, urlDatabase: urlDatabase };
   res.render("urls_show", templateVars);
 });
 
 app.get("/u/:shortURL", (req, res) => {
-  const templateVars = {username: req.cookies["username"]};
+  const templateVars = {username: req.cookies["user_id"]};
   let longURL = urlDatabase[req.params.shortURL];
   res.redirect(longURL, templateVars);
 });
 
 app.get("/urls/new" , (req, res) => {
-  const templateVars = {username: req.cookies["username"]}; 
+  const templateVars = {username: req.cookies["user_id"]}; 
   res.render("urls_new", templateVars);
 });
 
