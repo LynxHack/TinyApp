@@ -5,6 +5,7 @@ const PORT = 8080; // default port 8080
 const bodyParser = require("body-parser");
 const cookieParser = require('cookie-parser');
 
+
 let urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
@@ -26,17 +27,31 @@ const users = {
 app.set('view engine', 'ejs');
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(cookieParser());
-//Main url Post Handlers
+
+function emailcheck(email){
+  var matches = false;
+  for(user in users){
+    console.log(users[user]["email"], email)
+    if(users[user]["email"] === email){matches = true;}
+  }
+  console.log("email matched: " + matches);
+  return matches;
+}
+
+
+
+//////////////////////////
+//Main Url POST Handlers//
+//////////////////////////
+
 app.post("/urls", (req, res) => {
   console.log(req.body);  // debug statement to see POST parameters
   res.send("Ok");         // Respond with 'Ok' (to be replaced)
 });
 
-
 app.post("/login", (req, res) => {
   console.log("Login info incoming...");
   //check if username is entered
-
   if(req.body.username){
     res.cookie("username", req.body.username);
   }
@@ -44,8 +59,6 @@ app.post("/login", (req, res) => {
   res.redirect("/login")
 });
 
-
-///TO_DO
 app.post("/logout", (req, res) => {
   res.clearCookie("username").redirect("/urls");
 });
@@ -70,7 +83,35 @@ app.post("/urls/:id/delete", (req, res) => {
 	res.redirect("/urls");
 });
 
-//Main Url GET Handlers
+app.post("/register", (req, res) =>{
+  if(!req.body.password || !req.body.email){
+    console.log("user did not input a field in the registration form");
+    res.status(400).send("Failed to enter a field in registration form");
+  }
+  else if(emailcheck(req.body.email)){
+    console.log(!emailcheck(req.body.email));
+    res.status(400).send("Email addres already exists!");
+  }
+  var newid = generateRandomString();
+  users[newid] = {id: newid, email: req.body.email, password: req.body.password};
+  console.log("updated user list: ", users);
+  res.cookie["user_id"] = newid;
+  res.redirect("/urls");
+});
+
+
+
+
+
+
+/////////////////////////
+//Main Url GET Handlers//
+/////////////////////////
+
+app.get("/register", (req, res) =>{
+  res.render("registration");
+});
+
 app.get("/login", (req, res) => {
   const templateVars = {username: req.cookies["username"], users: users};
   console.log(templateVars["username"]);
