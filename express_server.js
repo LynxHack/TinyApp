@@ -71,10 +71,10 @@ app.post("/login", (req, res) => {
   if(!loginresult){
     res.status(403).send("Incorrect login credentials")
   }
-  res.cookie("username", loginresult)
+  res.cookie("user_id", loginresult)
   //res.cookie("username", req.body.username);
   console.log("Cookie value: " + loginresult);
-  res.redirect("/login")
+  res.redirect("/urls")
 });
 
 app.post("/logout", (req, res) => {
@@ -93,7 +93,7 @@ app.post("/register", (req, res) =>{
   var newid = generateRandomString();
   users[newid] = {id: newid, email: req.body.email, password: req.body.password};
   console.log("updated user list: ", users);
-  res.cookie["user_id"] = newid;
+  //res.cookie["user_id"] = newid;
   res.redirect("/urls");
 });
 
@@ -133,6 +133,11 @@ app.get("/login", (req, res) => {
 });
 
 app.get("/urls", (req, res) => {
+  console.log(!req.cookies["user_id"]);
+  if(!req.cookies["user_id"]){
+    res.status(300); //not logged in, redirect to login page
+    res.redirect("/login");
+  }
   let templateVars = {username: req.cookies["user_id"], urlDatabase: urlDatabase};
   res.render("urls_index", templateVars);
 });
