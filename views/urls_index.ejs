@@ -45,7 +45,7 @@
                 --> 
                 <a href="/urls/<%= url %>">Edit</a>   
                 <!- send POST request upon delete submit ->
-                <form method="POST" action="/urls/<%= url %>/delete">
+                <form method="POST" action="/urls/<%= url %>/delete?_method=DELETE">
                     <input class="button" type="submit" value="Delete">
                 </form> 
             </p>

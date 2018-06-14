@@ -12,7 +12,7 @@
 		<input id="login" type="submit" value="login" name="loginbutton">
 	</form>
 	<% } else {%>
-	<form method=POST action="/logout">
+	<form method=POST action="/logout?_method=PUT">
 		<input id="logout" type="submit" value="logout" name="logoutbutton">
 	</form>
 	<% } %>

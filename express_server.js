@@ -11,6 +11,11 @@ var cookieSession = require('cookie-session')
 //Bcrypt for password hashing
 const bcrypt = require('bcrypt');
 
+//Method Override for put and delete
+var methodOverride = require('method-override')
+
+
+///////////////////////////////////
 let urlDatabase = {
   "b2xVn2": {link:"http://www.lighthouselabs.ca",
             userid:"userRandomID"},
@@ -35,9 +40,8 @@ const users = {
 //Express middleware initialization
 app.set('view engine', 'ejs');
 app.use(bodyParser.urlencoded({extended: true}));
+app.use(methodOverride('_method'));
 app.use(cookieParser());
-
-
 app.use(cookieSession({
   name: 'session',
   keys: ['qyjlsfjlon', 'tqbqaqbiop', 'bcjnhmspaz'],
@@ -106,26 +110,6 @@ app.post("/urls", (req, res) => {
   res.send("Ok");         // Respond with 'Ok' (to be replaced)
 });
 
-app.post("/login", (req, res) => {
-  console.log("Login info incoming...");
-  if(!req.body.email || !req.body.password){
-    res.status(403).send("Please enter info in all boxes");
-  }
-  const loginresult = logincheck(req.body.email, req.body.password);
-  if(!loginresult){
-    res.status(403).send("Incorrect login credentials")
-  }
-  req.session.user_id = loginresult;
-  console.log("Cookie value: " + loginresult);
-  res.redirect("/urls")
-});
-
-app.post("/logout", (req, res) => {
-  req.session.user_id = null;
-  res.redirect("/urls");
-});
-
-
 app.post("/register", (req, res) =>{
   if(!req.body.password || !req.body.email){
     console.log("user did not input a field in the registration form");
@@ -151,7 +135,30 @@ app.post("/urls/new", (req, res) => {
   res.redirect("/urls");
 });
 
-app.post("/urls/:id", (req, res) => {
+/////////////////////////
+//Main Url PUT Handlers//
+/////////////////////////
+
+app.put("/login", (req, res) => {
+  console.log("Login info incoming...");
+  if(!req.body.email || !req.body.password){
+    res.status(403).send("Please enter info in all boxes");
+  }
+  const loginresult = logincheck(req.body.email, req.body.password);
+  if(!loginresult){
+    res.status(403).send("Incorrect login credentials")
+  }
+  req.session.user_id = loginresult;
+  console.log("Cookie value: " + loginresult);
+  res.redirect("/urls")
+});
+
+app.put("/logout", (req, res) => {
+  req.session.user_id = null;
+  res.redirect("/urls");
+});
+
+app.put("/urls/:id", (req, res) => {
   const id = req.params.id;
 	console.log("Updating long url of short url id: " + id);
   urlDatabase[id].link = req.body.URL;
@@ -159,8 +166,11 @@ app.post("/urls/:id", (req, res) => {
 	res.redirect("/urls");
 });
 
+/////////////////////////
+//Main Url DELETE Handlers//
+/////////////////////////
 
-app.post("/urls/:id/delete", (req, res) => {
+app.delete("/urls/:id/delete", (req, res) => {
 	console.log("running post urls id delete for" + req.params.id);
 	delete urlDatabase[req.params.id];
 	res.redirect("/urls");
@@ -222,7 +232,7 @@ app.get("/u/:shortURL", (req, res) => {
 
 //Port Listen
 app.listen(PORT, () => {
-  console.log(`Example app listening on port ${PORT}!`);
+  console.log(`TinyApp listening on port ${PORT}!`);
 });
 
 //Generates a random 6 character alphanumeric string
