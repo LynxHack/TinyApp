@@ -198,8 +198,9 @@ app.get("/urls", (req, res) => {
     res.redirect("/login");
   }
   var d = new Date();
+  if(req.session.user_id !== null){
   urltimelog.push({id: req.session.user_id, time: d.toLocaleString()});
-  console.log(urltimelog);
+  }
   let templateVars = {
     username: req.session.user_id, 
     urlDatabase: makeuserurls(req.session.user_id),
