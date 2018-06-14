@@ -203,6 +203,7 @@ app.get("/urls", (req, res) => {
   }
   let templateVars = {
     username: req.session.user_id, 
+    email: users[req.session.user_id]["email"],
     urlDatabase: makeuserurls(req.session.user_id),
     visitorinfo: req.session.visitinfo,
     urltimelog: urltimelog
