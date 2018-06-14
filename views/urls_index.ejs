@@ -9,18 +9,16 @@
             }
             .button{
                 padding: 14px 32px;
-                background-color: white;
+                background-color: rgb(4, 193, 226);
                 background-repeat: no-repeat;
                 background-image:  url(trashcan.png);
                 background-size: 30px auto;
                 background-position: right;
                 text-align: left;
+                font-size: 15px;
                 border-radius: 5px;
             }
-            a{
-                font-family: sans-serif;
-            }
-            p{
+            body{
                 font-family: sans-serif;
             }
         </style> 
@@ -29,39 +27,41 @@
     
     <body>
             <%- include partials/_header.ejs %>
+            <h2 style="font-family: sans-serif">Tiny App URLs</h2>
             <% for (var url in urlDatabase) { %>
-            <!- create form submission via inline javascript ->
-            <p><%=url%> &rarr; 
-                <a href= "<%=urlDatabase[url]%>"> <%=urlDatabase[url]%></a> 
-                <!--
-                <form id="edit<%=url%>" method="POST" action="/urls/<%= url %>">
-                        <a href="javascript:{}" 
-                        onclick="
-                        document.getElementById('edit<%=url%>').submit(); 
-                        return false;">
-                        edit
-                        </a>
-                </form>
-                --> 
-                <a href="/urls/<%= url %>">Edit</a>   
-                <!- send POST request upon delete submit ->
-                <form method="POST" action="/urls/<%= url %>/delete?_method=DELETE">
-                    <input class="button" type="submit" value="Delete">
-                </form> 
-            </p>
-        
+            <!-- create form submission via inline javascript -->
+            <form style="margin:0; padding: 0;" method="POST" action="/urls/<%= url %>/delete?_method=DELETE">
+                <div><%=url%> &rarr; 
+                    <a href= "<%=urlDatabase[url]%>"> <%=urlDatabase[url]%></a> 
+                    <a href="/urls/<%= url %>">Edit</a>   
+                        <input class="button" type="submit" value="Delete">
+                        <span> &nbsp # uses: 
+                                <% if(visitorinfo && visitorinfo[url]) {%> 
+                                <%-visitorinfo[url].length %>
+                                <% }  else {%>
+                                0
+                                <% } %>
+
+
+                               &nbsp # Unique Visitors: 
+                               <% if(visitorinfo && visitorinfo[url]) {%> 
+                               <%-visitorinfo[url].filter((x) => x!== "guest").length %>
+                               <% }  else {%>
+                                0
+                                <% } %>
+                        </span>
+                
+                    </div>
+            </form> 
+            <br/>
             <%}%>
-            
+
+            <br/>
+            <br/>
+
             <% if(username) {%>
             <a href="/urls/new">Make new shorturl!</a>
             <% }%>
-
-
-            <script>
-                document.getElementById("edit").onclick = function(){ /*TO DO: run ejs render of the */};
-            </script>
-        
-        <!-- Add your EJS code here -->
     </body>
 </html>                                             
 

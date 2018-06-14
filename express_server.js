@@ -18,9 +18,11 @@ var methodOverride = require('method-override')
 ///////////////////////////////////
 let urlDatabase = {
   "b2xVn2": {link:"http://www.lighthouselabs.ca",
-            userid:"userRandomID"},
+            userid:"userRandomID"
+          },
   "9sm5xK": {link: "http://www.google.com",
-            userid:"user2RandomID"}
+            userid:"user2RandomID"
+          }
 };
 
 //Initialize two entries for test cases
@@ -57,25 +59,19 @@ app.use(cookieSession({
 //return format {id: link, id: link ...}
 function makeuserurls(userid){
   let urllist = {};
-  console.log("user info", userid);
   for(url in urlDatabase){
-    console.log(urlDatabase[url]["userid"], userid)
     if(urlDatabase[url]["userid"] === userid){
       urllist[url] = urlDatabase[url]["link"];
     }
   }
-  console.log(urllist);
   return urllist;
 }
 
 //Return master url list in format {id: link, id: link}
 function masterurllist(){
-  let urllist = {};
-  console.log("user info", userid);
   for(url in urlDatabase){
       urllist[url] = urlDatabase[url]["link"];
   }
-  console.log(urllist);
   return urllist;
 }
 
@@ -166,9 +162,9 @@ app.put("/urls/:id", (req, res) => {
 	res.redirect("/urls");
 });
 
-/////////////////////////
+////////////////////////////
 //Main Url DELETE Handlers//
-/////////////////////////
+////////////////////////////
 
 app.delete("/urls/:id/delete", (req, res) => {
 	console.log("running post urls id delete for" + req.params.id);
@@ -197,11 +193,14 @@ app.get("/urls", (req, res) => {
     res.status(300); //not logged in, redirect to login page
     res.redirect("/login");
   }
+  
   let templateVars = {
-     username: req.session.user_id, 
-  urlDatabase: makeuserurls(req.session.user_id)
+    username: req.session.user_id, 
+    urlDatabase: makeuserurls(req.session.user_id),
+    visitorinfo: req.session.visitinfo
   };
 
+  //console.log("Current visitor info: ", templateVars.visitorinfo);
   res.render("urls_index", templateVars);
 });
 
@@ -226,6 +225,19 @@ app.get("/urls/:id", (req, res) => {
 app.get("/u/:shortURL", (req, res) => {
   const templateVars = {username: req.session.user_id};
   let longURL = urlDatabase[req.params.shortURL].link;
+
+  //storings visitor info (unique ones only)
+  if(!req.session.visitinfo)
+    req.session.visitinfo = {};
+  if(!req.session.visitinfo[req.params.shortURL])
+    req.session.visitinfo[req.params.shortURL] = [];
+  //if there is not yet an entry for the shorturl but there is a unique user id
+  if(req.session.user_id && !req.session.visitinfo[req.params.shortURL].includes(req.session.user_id))
+    req.session.visitinfo[req.params.shortURL].push(req.session.user_id);
+  else if(!req.session.user_id)
+    req.session.visitinfo[req.params.shortURL].push("guest");
+  
+  console.log("get current: " + req.session.visitinfo);
   console.log("Redirecting to: " + longURL);
   res.redirect(longURL);
 });

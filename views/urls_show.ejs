@@ -14,7 +14,7 @@
 
         <body>
             <p id = "titlename"><b>shortURL:</b> <%= shortURL %></p>
-                <form method="POST" action="/urls/<%= shortURL %>">
+                <form method="POST" action="/urls/<%= shortURL %>?_method=PUT">
                         <input type="text" name="URL" value="<%=urlDatabase[shortURL]%>" size ="35">
                         <input type="submit" value="Update">
                 </form>
