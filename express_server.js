@@ -14,7 +14,8 @@ const bcrypt = require('bcrypt');
 //Method Override for put and delete
 var methodOverride = require('method-override')
 
-
+var d = new Date();
+console.log("Starting server at " + d.toLocaleString());
 ///////////////////////////////////
 let urlDatabase = {
   "b2xVn2": {link:"http://www.lighthouselabs.ca",
@@ -38,6 +39,10 @@ const users = {
     password: bcrypt.hashSync("dishwasher-funk",10)
   }
 }
+
+//A full record starting at server startup of visitors
+//Format {id:id, time:time}
+const urltimelog = []
 
 //Express middleware initialization
 app.set('view engine', 'ejs');
@@ -188,16 +193,18 @@ app.get("/login", (req, res) => {
 });
 
 app.get("/urls", (req, res) => {
-  console.log(!req.session.user_id);
   if(!req.session.user_id){
     res.status(300); //not logged in, redirect to login page
     res.redirect("/login");
   }
-  
+  var d = new Date();
+  urltimelog.push({id: req.session.user_id, time: d.toLocaleString()});
+  console.log(urltimelog);
   let templateVars = {
     username: req.session.user_id, 
     urlDatabase: makeuserurls(req.session.user_id),
-    visitorinfo: req.session.visitinfo
+    visitorinfo: req.session.visitinfo,
+    urltimelog: urltimelog
   };
 
   //console.log("Current visitor info: ", templateVars.visitorinfo);

@@ -21,6 +21,33 @@
             body{
                 font-family: sans-serif;
             }
+            table, th, td {
+                border: 1px solid black;
+                border-collapse: collapse;
+            }
+            th {
+                text-align: left;
+            }
+            th, td {
+                padding: 15px;
+            }
+            table {
+                border-spacing: 5px;
+            }
+            table#t01 {
+                width: 100%; 
+                background-color: #f1f1c1;
+            }
+            table#t01 tr:nth-child(even) {
+                background-color: #eee;
+            }
+            table#t01 tr:nth-child(odd) {
+                background-color: #fff;
+            }
+            table#t01 th {
+                color: white;
+                background-color: black;
+            }
         </style> 
     
     </head>
@@ -35,6 +62,7 @@
                     <a href= "<%=urlDatabase[url]%>"> <%=urlDatabase[url]%></a> 
                     <a href="/urls/<%= url %>">Edit</a>   
                         <input class="button" type="submit" value="Delete">
+
                         <span> &nbsp # uses: 
                                 <% if(visitorinfo && visitorinfo[url]) {%> 
                                 <%-visitorinfo[url].length %>
@@ -50,7 +78,6 @@
                                 0
                                 <% } %>
                         </span>
-                
                     </div>
             </form> 
             <br/>
@@ -62,6 +89,24 @@
             <% if(username) {%>
             <a href="/urls/new">Make new shorturl!</a>
             <% }%>
+
+            <br/><br/><br/>
+            <hr>
+            <h2>Visitor History</h2>
+            <table style="width:100%">
+                    <tr>
+                      <th>ID</th> 
+                      <th>Time</th>
+                    </tr>
+            <% var orderedhistory = urltimelog.reverse(); %>
+            <% for(var i = 0; i < orderedhistory.length; i++){ %>
+                    <tr>
+                      <td><%-orderedhistory[i].id%></td> 
+                      <td><%-orderedhistory[i].time%></td>
+                    </tr>
+            <% } %>
+            </table>
+            
     </body>
 </html>                                             
 

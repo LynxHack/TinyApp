@@ -2,6 +2,7 @@
 
 ## Final Product 
 ![Screenshot](screenshot.png)
+![Screenshot](screenshot2.png)
 
 ## Dependencies
 - Node.js
