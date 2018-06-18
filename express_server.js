@@ -42,7 +42,7 @@ const users = {
 
 //A full record starting at server startup of visitors
 //Format {id:id, time:time}
-const urltimelog = []
+const urltimelog = [];
 
 //Express middleware initialization
 app.set('view engine', 'ejs');
@@ -130,7 +130,14 @@ app.post("/urls/new", (req, res) => {
     res.redirect("/login");
   }
   console.log("new url entered: " + req.body.longURL);
-  urlDatabase[generateRandomString()] = {link: req.body.longURL, userid: req.session.user_id};
+  var newurl = req.body.longURL;
+
+  //check if user entered protocol prior to address, if not, prepend
+  if(!newurl.includes("https://") && !newurl.includes("http://")){
+    newurl = "https://" + newurl;
+  }
+
+  urlDatabase[generateRandomString()] = {link: newurl, userid: req.session.user_id};
   console.log(req.body.URL);
   console.log(req.body);
   res.redirect("/urls");
@@ -190,6 +197,10 @@ app.get("/register", (req, res) =>{
 app.get("/login", (req, res) => {
   const templateVars = {username: req.session.user_id, users: users};
   res.render("login", templateVars);
+});
+
+app.get("/", (req, res) => {
+  res.redirect("/urls");
 });
 
 app.get("/urls", (req, res) => {
